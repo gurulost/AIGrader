@@ -19,7 +19,16 @@ import crypto from 'crypto';
 import * as gcsClient from './gcs-client';
 
 const readFileAsync = promisify(fs.readFile);
-const existsAsync = promisify(fs.exists);
+// fs.exists does not follow the Node callback convention, so promisify will
+// mis-handle its boolean argument. Use fs.promises.access instead.
+const existsAsync = async (filePath: string): Promise<boolean> => {
+  try {
+    await fs.promises.access(filePath, fs.constants.F_OK);
+    return true;
+  } catch {
+    return false;
+  }
+};
 const unlinkAsync = promisify(fs.unlink);
 const writeFileAsync = promisify(fs.writeFile);
 
