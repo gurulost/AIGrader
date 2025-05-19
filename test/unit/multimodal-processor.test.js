@@ -75,6 +75,7 @@ describe('Multimodal Processor Utilities', () => {
       expect(fs.promises.writeFile).toHaveBeenCalled();
       expect(result.buffer).toBeInstanceOf(Buffer);
       expect(result.localPath).toContain('.pdf');
+      expect(result.mimeType).toBe('application/pdf');
       expect(typeof result.cleanup).toBe('function');
       
       // Test cleanup function
