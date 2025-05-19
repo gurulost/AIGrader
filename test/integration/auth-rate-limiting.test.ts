@@ -40,10 +40,19 @@ vi.mock('passport', () => {
 });
 
 vi.mock('csrf-csrf', () => {
+  let storedToken: string | null = null;
   return {
     doubleCsrf: vi.fn().mockImplementation(() => ({
-      doubleCsrfProtection: vi.fn((req: any, res: any, next: any) => next()),
-      generateCsrfToken: vi.fn().mockReturnValue('mock-csrf-token')
+      generateCsrfToken: vi.fn((req: any, res: any) => {
+        storedToken = 'mock-csrf-token';
+        return storedToken;
+      }),
+      doubleCsrfProtection: vi.fn((req: any, res: any, next: any) => {
+        if (req.headers['x-csrf-token'] === storedToken) {
+          return next();
+        }
+        return res.status(403).json({ message: 'CSRF token validation failed' });
+      })
     }))
   };
 });
@@ -133,9 +142,14 @@ describe('Auth Endpoints Rate Limiting Integration Tests', () => {
     // Create Express app
     app = express();
     app.use(express.json());
-    
+
     // Configure auth routes
     configureAuth(app);
+
+    // Simple protected route for CSRF validation
+    app.post('/api/protected', (req: Request, res: Response) => {
+      res.json({ ok: true });
+    });
   });
   
   afterEach(() => {
@@ -183,6 +197,22 @@ describe('Auth Endpoints Rate Limiting Integration Tests', () => {
     
     expect(response.status).toBe(429);
     expect(response.body).toHaveProperty('message', 'Too many requests for CSRF token, please try again later.');
+  });
+
+  it('should allow protected requests with a valid CSRF token', async () => {
+    const agent = request.agent(app);
+    const tokenRes = await agent.get('/api/csrf-token');
+
+    expect(tokenRes.status).toBe(200);
+    const token = tokenRes.body.csrfToken;
+
+    const response = await agent
+      .post('/api/protected')
+      .set('x-csrf-token', token)
+      .send({});
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('ok', true);
   });
   
   it('should allow login when not rate limited', async () => {

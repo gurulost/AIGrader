@@ -377,24 +377,13 @@ export function configureAuth(app: any) {
   // Endpoint to get CSRF token (with rate limiting)
   app.get('/api/csrf-token', csrfRateLimiter, (req: Request, res: Response) => {
     try {
-      // Generate a secure token using native crypto module
-      import('crypto').then(crypto => {
-        const token = crypto.randomBytes(32).toString('hex');
-        return res.json({ csrfToken: token });
-      }).catch(error => {
-        console.error('Error importing crypto module - this is a critical security failure:', error);
-        // No fallback - if crypto is unavailable, we can't generate secure tokens
-        return res.status(500).json({ 
-          error: 'Unable to generate secure token',
-          message: 'Server security configuration error'
-        });
-      });
+      const token = csrfProtection.generateCsrfToken(req, res);
+      return res.json({ csrfToken: token });
     } catch (error: any) {
       console.error('Error generating CSRF token - this is a critical security failure:', error);
-      // No fallback - if we can't generate secure tokens, we must fail closed
-      return res.status(500).json({ 
+      return res.status(500).json({
         error: 'Critical security error',
-        message: 'Unable to generate secure token' 
+        message: 'Unable to generate secure token'
       });
     }
   });
