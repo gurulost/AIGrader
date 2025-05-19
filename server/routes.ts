@@ -5,6 +5,8 @@ import { configureAuth } from "./auth";
 import { submissionQueue } from "./queue/worker";
 import multer from "multer";
 import path from "path";
+import fs from "fs";
+import os from "os";
 import { StorageService } from "./services/storage-service";
 import { AIService } from "./services/ai-service";
 import { GeminiAdapter, SUPPORTED_MIME_TYPES } from "./adapters/gemini-adapter";
@@ -1424,20 +1426,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Test rubric with AI (instructor only)
   app.post('/api/test-rubric', requireAuth, requireRole('instructor'), asyncHandler(async (req: Request, res: Response) => {
-      const { content, assignmentContext } = req.body;
-      
-      if (!content) {
-        return res.status(400).json({ message: 'Content is required' });
+      const { content, assignmentContext, fileData, fileName, mimeType } = req.body;
+
+      if (!content && !fileData) {
+        return res.status(400).json({ message: 'Content or fileData is required' });
       }
-      
-      // Use AI service to analyze the content - always use GeminiAdapter since we have that key
+
       const aiService = new AIService(new GeminiAdapter());
-      
+
       try {
-        const feedback = await aiService.analyzeProgrammingAssignment({
-          content,
-          assignmentContext
-        });
+        let feedback;
+
+        if (fileData && fileName && mimeType) {
+          const tempPath = path.join(os.tmpdir(), `rubric-test-${Date.now()}`);
+          const base64 = fileData.startsWith('data:') ? fileData.split(',')[1] : fileData;
+          await fs.promises.writeFile(tempPath, Buffer.from(base64, 'base64'));
+
+          feedback = await aiService.analyzeMultimodalSubmission({
+            filePath: tempPath,
+            fileName,
+            mimeType,
+            assignmentTitle: 'Rubric Test',
+            assignmentDescription: assignmentContext
+          });
+
+          await fs.promises.unlink(tempPath);
+        } else {
+          feedback = await aiService.analyzeProgrammingAssignment({
+            content,
+            assignmentContext
+          });
+        }
         
         console.log("AI feedback generated successfully:", JSON.stringify(feedback).slice(0, 200) + "...");
         
