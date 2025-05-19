@@ -18,6 +18,31 @@ import crypto from 'crypto';
 // Import GCS client properly - will be available throughout the module 
 import * as gcsClient from './gcs-client';
 
+// Default hosts that are considered safe for downloading files
+const DEFAULT_ALLOWED_HOSTS = [
+  'storage.googleapis.com',
+  'googleapis.com',
+  'googleusercontent.com'
+];
+
+function getAllowedHosts(): string[] {
+  const extra = process.env.ALLOWED_DOWNLOAD_HOSTS;
+  if (!extra) {
+    return DEFAULT_ALLOWED_HOSTS;
+  }
+  return [
+    ...DEFAULT_ALLOWED_HOSTS,
+    ...extra.split(',').map((h) => h.trim()).filter(Boolean)
+  ];
+}
+
+function isHostAllowed(hostname: string): boolean {
+  const allowed = getAllowedHosts();
+  return allowed.some(
+    (host) => hostname === host || hostname.endsWith(`.${host}`)
+  );
+}
+
 const readFileAsync = promisify(fs.readFile);
 // fs.exists does not follow the Node callback convention, so promisify will
 // mis-handle its boolean argument. Use fs.promises.access instead.
@@ -425,6 +450,15 @@ export async function downloadFromUrl(url: string, mimeType?: string): Promise<{
     // Validate URL
     if (!url || url.trim() === '') {
       throw new Error('Empty URL provided to downloadFromUrl');
+    }
+
+    // Validate host if this is an HTTP/HTTPS URL
+    if (!url.startsWith('gs://')) {
+      const hostname = new URL(url).hostname;
+      if (!isHostAllowed(hostname)) {
+        console.warn(`[DOWNLOAD] Disallowed host attempted: ${hostname}`);
+        throw new Error(`Disallowed host: ${hostname}`);
+      }
     }
     
     // Generate a temporary file path
