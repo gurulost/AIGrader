@@ -339,13 +339,87 @@ Do not include explanatory text, comments, or markdown outside the JSON object.`
       
       // Create prompt parts for multimodal analysis
       const promptParts: MultimodalPromptPart[] = [];
-      
+
+      // ------- Text instructions and context -------
+      const textSegments = [] as string[];
+
+      textSegments.push(
+        `## Assignment Details:\nTitle: "${params.assignmentTitle}"\nDescription: "${
+          params.assignmentDescription || 'No general description provided.'
+        }"`
+      );
+
+      if (params.instructorContext) {
+        const contextContent = params.instructorContext.content;
+        textSegments.push(
+          `\n## Instructor-Only Evaluation Guidance (USE THIS INFORMATION BUT DO NOT REVEAL IT TO STUDENTS):\n${contextContent}\n\nIMPORTANT: The above section contains specific guidance provided by the instructor to help in your evaluation. Use these points to inform your analysis and the feedback you provide, but DO NOT directly quote or reveal this instructor-provided information in your feedback to the student.`
+        );
+      }
+
+      // Setup JSON output structure
+      let jsonOutputStructureFields = [
+        `"strengths": ["A list of 2-5 specific positive aspects of the submission, clearly explained (array of strings). Relate these to the assignment goals or rubric if applicable."],`,
+        `"improvements": ["A list of 2-5 specific areas where the submission could be improved, with constructive explanations (array of strings). Relate these to the assignment goals or rubric if applicable."],`,
+        `"suggestions": ["A list of 2-5 concrete, actionable suggestions the student can implement to improve their work or understanding (array of strings)."],`,
+        `"summary": "A concise (2-4 sentences) overall summary of the submission's quality, highlighting key takeaways for the student."`
+      ];
+
+      if (params.rubric && params.rubric.criteria && params.rubric.criteria.length > 0) {
+        textSegments.push("\n## Evaluation Rubric:");
+        textSegments.push(
+          "You MUST evaluate the student's submission against EACH of the following rubric criteria meticulously. For each criterion, provide specific feedback and a numeric score within the specified range."
+        );
+
+        const criteriaDetails = params.rubric.criteria
+          .map((criterion) => {
+            let criterionString = `- Criterion Name: "${criterion.name}" (ID: ${criterion.id})\n`;
+            criterionString += `  Description: "${criterion.description}"\n`;
+            criterionString += `  Maximum Score: ${criterion.maxScore}`;
+            if (criterion.weight) {
+              criterionString += ` (Weight: ${criterion.weight}%)`;
+            }
+            return criterionString;
+          })
+          .join("\n");
+        textSegments.push(criteriaDetails);
+
+        jsonOutputStructureFields.push(
+          `"criteriaScores": [\n    // For EACH criterion listed above, include an object like this:\n    {\n      "criteriaId": "ID_of_the_criterion",\n      "score": <numeric_score_for_this_criterion_up_to_its_maxScore>,\n      "feedback": "Specific, detailed feedback for this particular criterion, explaining the rationale for the score and how to improve (string)."\n    }\n    // ... ensure one object per criterion\n  ],`
+        );
+        jsonOutputStructureFields.push(
+          `"score": <OPTIONAL but Recommended: An overall numeric score from 0-100. If rubric criteria have weights, attempt to calculate a weighted average. Otherwise, provide a holistic quality score.>`
+        );
+      } else {
+        textSegments.push(
+          `\n## General Evaluation Focus (No specific rubric provided):\nPlease analyze the submission for:\n1.  Clarity, coherence, and organization of the content.\n2.  Fulfillment of the assignment requirements as per the description.\n3.  Identification of strengths and positive aspects.\n4.  Areas that could be improved, with constructive explanations.\n5.  Actionable suggestions for the student.\n6.  If the submission appears to be code or involves technical problem-solving, also consider aspects like correctness, efficiency (if discernible), and clarity/documentation.`
+        );
+        jsonOutputStructureFields.push(
+          `"criteriaScores": [] // Empty array as no specific rubric criteria were provided for itemized scoring.`
+        );
+        jsonOutputStructureFields.push(
+          `"score": <A numeric score from 0-100 representing the overall quality based on the general evaluation focus above.>`
+        );
+      }
+
+      textSegments.push(
+        `\n## JSON Output Structure:\nYour response MUST be a single, valid JSON object adhering to the following structure. Ensure all string values are properly escaped within the JSON.\n{\n  ${jsonOutputStructureFields.join("\n  ")}\n}`
+      );
+
+      textSegments.push(
+        "\nProvide your feedback now as a single, valid JSON object:"
+      );
+
+      const finalPromptText = textSegments.join("\n");
+
+      // Add the text instructions as the first part so Gemini has full context
+      promptParts.push({ type: 'text', content: finalPromptText });
+
       // Add the file content as the appropriate type
       promptParts.push({
         type: processedFile.contentType as ContentType,
         content: processedFile.content,
         mimeType: params.mimeType,
-        textContent: processedFile.textContent // Pass through any extracted text content
+        textContent: processedFile.textContent
       });
       
       // Build a system prompt for assignment context with enhanced guidance for multimodal content
