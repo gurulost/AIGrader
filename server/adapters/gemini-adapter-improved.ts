@@ -11,7 +11,7 @@
  */
 
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold, Part } from '@google/generative-ai';
-import { createFileData, shouldUseFilesAPI } from '../utils/improved-file-handler';
+import { createFileData, shouldUseFilesAPI } from '../utils/gemini-file-handler';
 import { AIAdapter, AIAdapterResponse } from './ai-adapter';
 import { AIContentType, GradingFeedback, MultimodalPromptPart } from '../types';
 import { pruneGeminiSchema } from '../utils/schema-utils';
