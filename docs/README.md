@@ -52,7 +52,7 @@ This documentation is designed to be a comprehensive resource for developers wor
 
 1. First, consult the appropriate reference document in the `gemini_references` directory
 2. See the relevant adapter implementation in `server/adapters`
-3. Refer to test scripts in the root directory for examples (files starting with `test-`)
+3. Refer to example scripts in the `scripts/` directory (files starting with `test-`)
 
 ## Updating Documentation
 

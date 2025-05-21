@@ -135,10 +135,10 @@ if (typeof part.content === 'string') {
 
 A comprehensive test suite has been created to validate these improvements:
 
-1. `test-adapter-fixes.js` - Validates the overall adapter improvements
-2. `test-gemini-file-handler.js` - Tests proper parameter ordering in createFileData
-3. `test-document-handling.js` - Tests DOCX file handling via Files API
-4. `test-metadata-handling.js` - Tests usageMetadata capture from API responses
+1. `scripts/test-adapter-fixes.js` - Validates the overall adapter improvements
+2. `scripts/test-gemini-file-handler.js` - Tests proper parameter ordering in createFileData
+3. `scripts/test-document-handling.js` - Tests DOCX file handling via Files API
+4. `scripts/test-metadata-handling.js` - Tests usageMetadata capture from API responses
 
 ## Additional Notes
 

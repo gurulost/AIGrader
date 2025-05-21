@@ -79,8 +79,8 @@ const filePart: Part = {
 
 Two test scripts were created to validate the improvements:
 
-1. `test-docx-handling-fixed.js`: Tests DOCX file uploads and processing
-2. `test-image-handling-fixed.js`: Tests handling of various image types and sizes
+1. `scripts/test-docx-handling-fixed.js`: Tests DOCX file uploads and processing
+2. `scripts/test-image-handling-fixed.js`: Tests handling of various image types and sizes
 
 ## Notes for Future Development
 

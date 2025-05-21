@@ -39,7 +39,7 @@ All agents MUST review these key resources before working with the AIGrader code
 - **Environment Variables**: Copy `.env.example` to `.env` and configure as needed. Critical variables include `NODE_ENV`, `GEMINI_API_KEY`, `DATABASE_URL`, and Redis settings
 - **Database Setup**: Run `npm run db:push` to migrate database schema changes
 - **Development Server**: Run `npm run dev` to start the development server (runs both backend and frontend with hot reloading)
-- For testing Gemini API changes, use the test scripts in project root (e.g., `test-gemini-adapter.js`)
+- For testing Gemini API changes, use the example scripts in the `scripts/` directory (e.g., `scripts/test-gemini-adapter.js`)
 - Test image upload handling with small images (< 5MB) using data URIs
 - For larger files, use the Files API with proper MIME type specification
 
