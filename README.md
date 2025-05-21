@@ -11,7 +11,7 @@ An AI-powered assignment feedback platform that enhances educational workflows t
 - **Submissions Management**: Track student submissions and progress
 - **Batch Processing**: Handle large volumes of submissions through a robust queue system
 - **Analytics Dashboard**: Visualize student performance and submission patterns
-- **Anonymous Submissions**: Support for shareable links that don't require student accounts
+- **Shareable Links**: Students can access assignments via a link that prompts login or signup before submission
 
 ## Technology Stack
 

@@ -131,7 +131,7 @@ describe('Submission Flow Resilience', () => {
       }
     });
     
-    // Setup route for anonymous submissions
+    // Setup route for link-based submissions
     app.post('/api/test-anonymous-submissions', async (req: Request, res: Response) => {
       try {
         const { code, content } = req.body;
@@ -153,7 +153,7 @@ describe('Submission Flow Resilience', () => {
         try {
           const submission = await mockStorage.createSubmission({
             assignmentId: assignment.id,
-            // For anonymous, set userId to system value or similar
+            // For link-based submissions, set userId to system value or similar
             userId: 0,
             content,
             status: 'pending'
@@ -162,7 +162,7 @@ describe('Submission Flow Resilience', () => {
           return res.status(201).json(submission);
         } catch (error) {
           // First error - try fallback approach
-          console.error('Error creating anonymous submission, trying fallback:', error);
+          console.error('Error creating link-based submission, trying fallback:', error);
           
           // Simulate fallback SQL approach
           const fallbackSubmission = {
@@ -278,7 +278,7 @@ describe('Submission Flow Resilience', () => {
     expect(mockStorage.listSubmissionsForAssignment).toHaveBeenCalledWith(1);
   });
   
-  it('should handle anonymous submissions with error handling', async () => {
+  it('should handle link-based submissions with error handling', async () => {
     // Simulate database column error
     mockStorage.createSubmission.mockRejectedValueOnce(
       new Error('column "mime_type" of relation "submissions" does not exist')
@@ -288,14 +288,14 @@ describe('Submission Flow Resilience', () => {
       .post('/api/test-anonymous-submissions')
       .send({
         code: 'ABC123',
-        content: 'Anonymous submission content'
+        content: 'Link-based submission content'
       });
     
     expect(response.status).toBe(201);
     expect(response.body).toHaveProperty('id', 888); // Fallback ID
     expect(response.body).toHaveProperty('assignmentId', 2);
     expect(response.body).toHaveProperty('userId', 0); // Anonymous user ID
-    expect(response.body).toHaveProperty('content', 'Anonymous submission content');
+    expect(response.body).toHaveProperty('content', 'Link-based submission content');
     // Verify assignment was looked up by code
     expect(mockStorage.getAssignment).toHaveBeenCalledWith('ABC123');
   });

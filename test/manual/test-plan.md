@@ -53,7 +53,7 @@ This document outlines a comprehensive test plan for verifying all functionality
 | Test Case | Steps | Expected Result | Status |
 |-----------|-------|-----------------|--------|
 | Access via Link (Logged In) | 1. Login as student<br>2. Access assignment via shareable link | Should show assignment details and submission form | |
-| Access via Link (Anonymous) | 1. Logout/use incognito<br>2. Access assignment via shareable link | Should require authentication before allowing submission | |
+| Access via Link (Not Logged In) | 1. Logout/use incognito<br>2. Access assignment via shareable link | Should require authentication before allowing submission | |
 | Submit via Link | 1. Login as student<br>2. Access via link<br>3. Submit assignment | Submission should be properly attributed to student | |
 
 ## 6. Admin Functions Tests

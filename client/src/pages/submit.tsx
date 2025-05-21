@@ -82,7 +82,7 @@ export default function SubmitAssignment({ code: propCode }: SubmitAssignmentPro
         
         // Verify the assignment has a shareable code
         if (!data.shareableCode) {
-          throw new Error('Invalid assignment link. This assignment may not be configured for anonymous submissions.');
+          throw new Error('Invalid assignment link. This assignment may not allow link-based submissions.');
         }
         
         setAssignment(data);

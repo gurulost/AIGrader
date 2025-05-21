@@ -15,16 +15,16 @@ Both of these values are **required** and the application will fail to start if 
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-### Anonymous Submissions Security
+### Shareable Link Security
 
-Anonymous submissions (via shareable link) require proper validation:
+Submissions initiated from a shareable link require authentication and validation:
 
 1. Each assignment has a unique `shareableCode` generated when the assignment is created
-2. The client-side submission form must include this `shareableCode` in the request
+2. Students must log in or sign up before submitting via the link
 3. The server validates that the provided `shareableCode` matches the assignment's stored code
 4. Submissions are rejected with a 403 Forbidden status if the codes don't match
 
-This prevents unauthorized submissions to assignments by simply guessing assignment IDs.
+This prevents unauthorized submissions or guessing of assignment IDs.
 
 ## Authentication and Authorization
 
@@ -87,7 +87,7 @@ Our security features have been extensively tested to ensure they function corre
    - Tests validating proper handling of proxy IPs
 
 3. **Shareable Code Validation**
-   - Tests ensuring anonymous submissions require a valid shareable code
+   - Tests ensuring shareable link submissions require a valid shareable code
    - Tests verifying code validation against assignment ID
    - Tests confirming proper error responses for invalid codes
    - Tests checking proper error handling

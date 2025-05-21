@@ -386,9 +386,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   }));
 
-  // Anonymous submission (via shareable link) - with strict rate limiting
-  // The /api/anonymous-submissions endpoint is now deprecated - everything should use the authenticated endpoint
-  // We're keeping this route but making it require authentication for backward compatibility
+  // Shareable link submission (requires authentication) - with strict rate limiting
+  // The /api/anonymous-submissions endpoint is now deprecated but remains for backward compatibility
+  // It now requires authentication and mirrors the main submissions endpoint
   app.post('/api/anonymous-submissions', submissionRateLimiter, requireAuth, upload.single('file'), asyncHandler(async (req: Request, res: Response) => {
     const submissionSchema = z.object({
       assignmentId: z.string().transform(val => parseInt(val)),
@@ -397,7 +397,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       email: z.string().email(),
       notes: z.string().optional(),
       code: z.string().optional(),
-      shareableCode: z.string().min(1, "Shareable code is required for anonymous submissions"),
+      shareableCode: z.string().min(1, "Shareable code is required for link-based submissions"),
     });
     
     const result = submissionSchema.safeParse(req.body);

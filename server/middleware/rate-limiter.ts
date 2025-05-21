@@ -77,7 +77,7 @@ export const authRateLimiter = rateLimit({
   }
 });
 
-// Strict rate limiter for anonymous submissions (5 requests per minute)
+// Strict rate limiter for shareable link submissions (5 requests per minute)
 export const submissionRateLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
   limit: 5, // 5 requests per window

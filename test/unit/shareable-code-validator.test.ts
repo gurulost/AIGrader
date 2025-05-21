@@ -36,7 +36,7 @@ describe('Shareable Code Validation', () => {
   // Define the validator function to test in isolation
   const validateShareableCode = async (req: Request, res: Response, next: any) => {
     try {
-      // For anonymous submissions, require shareableCode
+      // For shareable link submissions, require shareableCode
       if (!req.body.shareableCode) {
         return res.status(400).json({
           status: 'error',

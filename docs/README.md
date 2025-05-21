@@ -45,6 +45,7 @@ The [Gemini API References](./gemini_references/index.md) directory contains det
 
 - [Security Policy and Practices](../SECURITY.md) - Security requirements and best practices
 - [Security Fixes](../SECURITY_FIXES.md) - Documentation of security improvements
+- [Marketing Overview](./marketing-overview.md) - Messaging highlights for outreach
 
 ## Using This Documentation
 
