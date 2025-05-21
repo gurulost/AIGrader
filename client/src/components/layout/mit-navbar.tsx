@@ -18,6 +18,11 @@ export function MITNavbar() {
   const { user, isAuthenticated, logout } = useAuth();
   const [location] = useLocation();
 
+  // Logged in users use the in-app sidebar/header navigation
+  if (isAuthenticated) {
+    return null;
+  }
+
   // Navigation links based on user role
   const getNavLinks = () => {
     if (!isAuthenticated || !user) {
